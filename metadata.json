@@ -1,0 +1,6 @@
+{
+  "name": "Quantaris",
+  "description": "Premium multi-device SaaS crypto intelligence terminal, real-time volume calculations, dynamic EMA trends, and quantitative asset ranking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default-deny Catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    // Helper to validate basic IDs (ID Poisoning Guard)
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    
+    function incoming() { 
+      return request.resource.data; 
+    }
+    
+    function existing() { 
+      return resource.data; 
+    }
+
+    // Schema Validation Helpers (The Anti-Value Poisoning and Shadow-Update Guard)
+    function isValidGlobalConfig(data) {
+      return data.keys().hasAll([
+        'quantWeightVolMc', 
+        'quantWeightEma', 
+        'quantWeightRsi', 
+        'quantWeightVolConf', 
+        'quantWeightAdx', 
+        'quantWeightLiq', 
+        'quantScoreThreshold'
+      ]) 
+      && data.keys().size() <= 10
+      && data.quantWeightVolMc is number
+      && data.quantWeightVolMc >= 0
+      && data.quantWeightEma is number
+      && data.quantWeightEma >= 0
+      && data.quantWeightRsi is number
+      && data.quantWeightRsi >= 0
+      && data.quantWeightVolConf is number
+      && data.quantWeightVolConf >= 0
+      && data.quantWeightAdx is number
+      && data.quantWeightAdx >= 0
+      && data.quantWeightLiq is number
+      && data.quantWeightLiq >= 0
+      && data.quantScoreThreshold is number
+      && data.quantScoreThreshold >= 0;
+    }
+
+    function isValidCustomPreset(data) {
+      return data.keys().hasAll([
+        'id', 
+        'name', 
+        'symbol', 
+        'volume', 
+        'marketCap'
+      ])
+      && data.keys().size() <= 7
+      && data.id is string && data.id.size() <= 64
+      && data.name is string && data.name.size() <= 128
+      && data.symbol is string && data.symbol.size() <= 16
+      && data.volume is number
+      && data.volume >= 0
+      && data.marketCap is number
+      && data.marketCap > 0;
+    }
+
+    // Config Collection Rules - accessible by any client instance for instant setup syncing
+    match /configs/{configId} {
+      allow read: if true;
+      allow create, update: if isValidId(configId) && isValidGlobalConfig(incoming());
+    }
+
+    // Custom Presets Rules - sync user added assets
+    match /presets/{presetId} {
+      allow read: if true;
+      allow create, update: if isValidId(presetId) && isValidCustomPreset(incoming());
+      allow delete: if isValidId(presetId);
+    }
+  }
+}

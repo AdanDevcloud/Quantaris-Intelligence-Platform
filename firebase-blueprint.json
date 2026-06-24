@@ -1,0 +1,53 @@
+{
+  "entities": {
+    "GlobalConfig": {
+      "title": "Global Configuration",
+      "description": "Shared configurations, search thresholds, weights, and live edits synchronized across devices.",
+      "type": "object",
+      "properties": {
+        "quantWeightVolMc": { "type": "number", "description": "Weight of Vol/MC in scoring" },
+        "quantWeightEma": { "type": "number", "description": "Weight of EMA Structure in scoring" },
+        "quantWeightRsi": { "type": "number", "description": "Weight of RSI Divergence in scoring" },
+        "quantWeightVolConf": { "type": "number", "description": "Weight of Volume Confirmation in scoring" },
+        "quantWeightAdx": { "type": "number", "description": "Weight of ADX strength in scoring" },
+        "quantWeightLiq": { "type": "number", "description": "Weight of Liquidity in scoring" },
+        "quantScoreThreshold": { "type": "number", "description": "Threshold score for filtering" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last updated timestamp" },
+        "updatedBy": { "type": "string", "description": "Device info of the editor" }
+      },
+      "required": [
+        "quantWeightVolMc",
+        "quantWeightEma",
+        "quantWeightRsi",
+        "quantWeightVolConf",
+        "quantWeightAdx",
+        "quantWeightLiq",
+        "quantScoreThreshold"
+      ]
+    },
+    "CustomPreset": {
+      "title": "Custom Preset Coin",
+      "description": "A custom user-created preset asset trackable and editable in real-time across devices.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier of preset" },
+        "name": { "type": "string", "description": "The name of the coin" },
+        "symbol": { "type": "string", "description": "Coin ticker symbol" },
+        "volume": { "type": "number", "description": "Custom trading volume" },
+        "marketCap": { "type": "number", "description": "Custom market cap" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the preset was created" }
+      },
+      "required": ["id", "name", "symbol", "volume", "marketCap"]
+    }
+  },
+  "firestore": {
+    "/configs/global": {
+      "schema": "GlobalConfig",
+      "description": "Single real-time sync document containing global engine settings"
+    },
+    "/presets/{presetId}": {
+      "schema": "CustomPreset",
+      "description": "User created custom coins tracked in the workspace and synced across all instances"
+    }
+  }
+}
