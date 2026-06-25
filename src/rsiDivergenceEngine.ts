@@ -292,10 +292,9 @@ export async function fetchLiveBinance1HCandles(symbol: string, approxPrice?: nu
       low: parseFloat(item[3]),
       close: parseFloat(item[4]),
       volume: parseFloat(item[5])
-    }));
+   }));
   } catch (error) {
-    console.warn(`Binance fetch failed for ${symbol}, switching to deterministic mock engine.`, error);
-    // FALLBACK: Use existing mock generator here
-    return generateDeterministicCandles(symbol, approxPrice || 0);
+  console.error(`Binance data unavailable for ${symbol}.`, error);
+  throw new Error(`Live Binance data unavailable for ${symbol}`);
   }
 }
